@@ -1,0 +1,93 @@
+ONline package for GitLab 
+
+curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.deb.sh | sudo bash
+
+
+wget --content-disposition https://packages.gitlab.com/gitlab/gitlab-ee/packages/ubuntu/bionic/gitlab-ee_14.9.0-ee.0_amd64.deb/download.deb
+
+
+sudo dpkg -i gitlab-ee_14.9.0-ee.0_amd64.deb
+
+
+
+https://packages.gitlab.com/gitlab/gitlab-ee/packages/ubuntu/bionic/gitlab-ee_14.10.3-ee.0_amd64.deb ---> link of the package
+
+
+
+How to add repository package in GitLab list and update from that:
+
+1. cd /etc/apt/sources.list.d
+2.ls
+3.nano /gitlab-ee.list
+4.paste (deb https://packages.gitlab.com/gitlab/gitlab-ee/ubuntu/ jammy main)
+5.save and close
+6.Add signing key (curl https://packages.gitlab.com/gpg.key | sudo apt-key add -)
+7.sudo apt-get update
+8.apt-cache madison gitlab-ee
+9.sudo apt-get install gitlab-ee=15.5.5-ee.0
+10.sudo gitlab-ctl reconfigure
+sudo gitlab-ctl restart
+11.sudo gitlab-rake gitlab:env:info
+
+
+
+
+cmds related to the GitLab instance
+
+sudo apt-get update --> to update
+sudo apt-get install gitlab-ce  -->install 
+sudo gitlab-ctl restart         -->restart
+sudo gitlab-ctl status          -->check status
+sudo gitlab-rake gitlab:env:info --> check version
+
+
+
+
+After 15.11.8 upgrade if u faced problem , it told to upgrade postgresql from 12v to 13v to continue,
+
+DB upgrade from 12 to 13
+
+
+psql --version -- to check PostgreSQL version
+
+1.sudo gitlab-ctl pg-upgrade -V 13
+2.sudo rm -rf /var/opt/gitlab/postgresql/data.12
+3.sudo rm -f /var/opt/gitlab/postgresql-version.old
+4.sudo gitlab-ctl reconfigure
+sudo gitlab-ctl restart
+
+
+After 16.11 upgrade if u faced sidekiq['max_concurrency'] problem,
+
+1.sudo vi /etc/gitlab/gitlab.rb
+
+2.Edit your gitlab.rb file to replace sidekiq['max_concurrency'] with sidekiq['concurrency']. You can find this file typically located at /etc/gitlab/gitlab.rb.
+
+to search this u can use '/' cmd inside vi editor 
+eg:/sidekiq['max_concurrency'] to sidekiq['concurrency'] = 50 and enter to change, And give i to insert mode and change the value to 50 
+
+take the word max and add 50 in value and wq! and save.
+
+.sidekiq['concurrency'] = <desired_value>
+
+3.sudo gitlab-ctl reconfigure
+
+
+Note: if we are upgrade are stopped in between , apt-get or gpkg file will be stopped and locked to fix that,
+
+1.ps aux | grep apt
+ps aux | grep dpkg
+
+2.sudo kill -9 69353
+
+3.sudo rm /var/lib/dpkg/lock-frontend
+sudo rm /var/lib/apt/lists/lock
+sudo rm /var/cache/apt/archives/lock
+
+4.sudo dpkg --configure -a
+sudo apt-get update
+
+5.sudo apt-get install gitlab-ee=17.1.1-ee.0
+
+
+
